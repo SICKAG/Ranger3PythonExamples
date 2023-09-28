@@ -1,1 +1,2 @@
 Harvesters
+image  // Used for writing images to disc in the demo file
