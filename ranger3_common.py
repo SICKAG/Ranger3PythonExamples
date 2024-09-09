@@ -32,19 +32,19 @@ def read_file(node_map, filename, verbosity=1):
     offset = 0
     time.sleep(1)
     result = b''
-    hunk_size = 4096
+    chunk_size = 4096
     while offset < node_map.FileSize.value:
         print_verbose(f"Offset = {offset}", verbosity)
         node_map.FileOperationSelector.value = 'Read'
         node_map.FileAccessOffset.value = offset
-        node_map.FileAccessLength.value = hunk_size
+        node_map.FileAccessLength.value = chunk_size
         node_map.FileOperationExecute.execute()
         time.sleep(1)
         print_verbose(f"length = {node_map.FileAccessLength.value}", verbosity)
-        hunk = node_map.FileAccessBuffer.get(node_map.FileOperationResult.value)
-        print_verbose(f"hunk = {hunk}", verbosity)
-        result += hunk
-        offset += hunk_size
+        chunk = node_map.FileAccessBuffer.get(node_map.FileOperationResult.value)
+        print_verbose(f"chunk = {chunk}", verbosity)
+        result += chunk
+        offset += chunk_size
     time.sleep(1)
     node_map.FileOperationSelector.value = 'Close'
     node_map.FileOperationExecute.execute()
@@ -73,14 +73,14 @@ def write_file(node_map, filename, buffer, verbosity=1):
         b.extend(bytearray(4 - (len(buffer) % 4)))
         buffer = bytes(b)
     offset = 0
-    hunk_size = 4096
+    chunk_size = 4096
     time.sleep(1)
     while offset < len(buffer):
         node_map.FileOperationSelector.value = 'Write'
 
         node_map.FileAccessOffset.value = offset
         remaining_byte_count = len(buffer) - offset
-        bytes_to_write = min(hunk_size, remaining_byte_count)
+        bytes_to_write = min(chunk_size, remaining_byte_count)
         print_verbose(f"Offset={offset}", verbosity)
         print_verbose(f"Will write {bytes_to_write} bytes", verbosity)
 
@@ -88,9 +88,8 @@ def write_file(node_map, filename, buffer, verbosity=1):
         node_map.FileAccessBuffer.set(buffer[offset: offset + bytes_to_write])
         print_verbose(f"access buffer = {node_map.FileAccessBuffer.get(bytes_to_write)}", verbosity)
         node_map.FileOperationExecute.execute()
-        # time.sleep(1)
         offset += node_map.FileAccessLength.value
-        if offset % (len(buffer) / 10) < hunk_size:
+        if offset % (len(buffer) / 10) < chunk_size:
             print_verbose(f"File transfer progress: {int(100 * offset / len(buffer))}%",
                           verbosity, 1)
 
