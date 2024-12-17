@@ -34,7 +34,11 @@ def main():
     # Create the Harvester instance
     h = Harvester()
     # Load the cti-file
-    h.add_file(CTI_FILE_PATH)
+    # check_existence=True will check if the file exists and throw
+    # FileNotFoundError if it does not.
+    # check_validity=True will check if the file is valid and throw
+    # OSError if it is not.
+    h.add_file(CTI_FILE_PATH, check_existence=True, check_validity=True)
     # Update Harvester, this will update the list of devices
     h.update()
 
